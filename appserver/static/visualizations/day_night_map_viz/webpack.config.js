@@ -4,6 +4,9 @@ var path = require('path');
 module.exports = {
     entry: 'visualization_source',
     module: {
+        loaders: [
+            {include: /\.json$/, loaders: ["json-loader"]}
+        ]        
     },    
     resolve: {
         extensions: ['', '.json', '.jsx', '.js'],
