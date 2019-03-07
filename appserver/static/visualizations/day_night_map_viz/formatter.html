@@ -25,10 +25,10 @@
     </splunk-control-group>
 
     <splunk-control-group label="Overlays font">
-        <splunk-select name="{{VIZ_NAMESPACE}}.fontstyle" value="bold">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.fontstyle" value="bold">
             <option value="normal">Normal</option>
             <option value="bold">Bold</option>
-        </splunk-select> 
+        </splunk-radio-input> 
     </splunk-control-group>
 
    <splunk-control-group label="Background color">
@@ -83,10 +83,11 @@
     </splunk-control-group>
 
    <splunk-control-group label="Land coloring">
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.landcoloring" value="auto">
-            <option value="auto">Auto</option>
+        <splunk-select name="{{VIZ_NAMESPACE}}.landcoloring" value="autod">
+            <option value="autol">Auto lighter</option>
+            <option value="autod">Auto darker</option>
             <option value="custom">Custom</option>
-        </splunk-radio-input>
+        </splunk-select>
     </splunk-control-group>
 
     <splunk-control-group label="Land color gradient left">

@@ -5,6 +5,7 @@ define([
     'moment-timezone',
     'd3',
     'topojson',
+    'tooltip.js',
     'api/SplunkVisualizationBase',
     'api/SplunkVisualizationUtils'
 ],
@@ -14,6 +15,7 @@ function(
     momenttz,
     d3,
     topojson,
+    Tooltip,
     SplunkVisualizationBase,
     vizUtils
 ) {
@@ -40,7 +42,7 @@ function(
                 color: "#525f83",
                 bgcolor: "#2c3856",
                 fontstyle: "bold",
-                landcoloring: "auto",
+                landcoloring: "autod",
                 shadowOpacity: "0.16",
                 landColorLeft: "",
                 landColorRight: "",
@@ -102,11 +104,21 @@ function(
             }, 1000);
                 
             var overlays = [
-                {lat: -27.3818631, lon: 152.7130211, type:"clock", content: "Brisbane", timezone: "Australia/Brisbane", size: 2},
-                {lat: 51.5285582, lon: -0.2416783, type:"clock", content: "London", timezone: "Europe/London", color: "#00cc00"},
+                //{lat: -27.3818631, lon: 152.7130211, type:"clock", content: "Brisbane", timezone: "Australia/Brisbane", size: 2},
+                //{lat: 51.5285582, lon: -0.2416783, type:"clock", content: "London", timezone: "Europe/London", color: "#00cc00"},
                 //{lat: 39.372883, lon: -73.9391617, type:"text", content: "New York"},
-                {lat: 39.372883, lon: -73.9391617, type:"clock", content: "New York", timezone: "America/New_York"},
-                {lat: 34.0203996, lon: -118.5518137, type:"clock", content: "Los Angeles", timezone: "America/Los_Angeles", size: 0.6}
+                //{lat: 39.372883, lon: -73.9391617, type:"clock", content: "New York", timezone: "America/New_York"},
+                //{lat: 34.0203996, lon: -118.5518137, type:"clock", content: "Los Angeles", timezone: "America/Los_Angeles", size: 0.6},
+               // {lat: 39.372883, lon: -73.9391617, type:"icon", content: "map-marker-alt", size: 2, color: "#00cc00"},
+                
+                {lat: -27.3818631, lon: 152.7130211, type:"icon", content: "times-circle", size: 1, color: "#dc4e41", tooltip: "This is a test"},
+                {lat: -37.9722342, lon: 144.7729631, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a <bold>test</bold>"},
+                {lat: -12.4258984, lon: 130.8982891, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
+                {lat: -32.0397559, lon: 115.6813616, type:"icon", content: "exclamation-triangle", size: 1, color: "#f8be34", tooltip: "This is a test very long tooltip it is super duper long lorum ipsum going to the beach"}, 
+                {lat: -35.0004451, lon: 138.3309867, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
+                {lat: 39.372883, lon: -73.9391617, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
+
+                
             ];
             // TODO First remove all existing overlays
             overlays.forEach((overlay, i) => {
@@ -120,9 +132,13 @@ function(
                 var color = map.config.color;
                 if (overlay.hasOwnProperty("color")) {
                     color = overlay.color;
-                }                
+                }
+                var textshadow = "rgb(0, 0, 0) 1px 1px 0";
                 var $olay;
-                if (overlay.type.toLowerCase() === "text") {
+                if (overlay.type.toLowerCase() === "icon") {
+                    $olay = $("<i></i>").addClass("fas fa-" + overlay.content);
+                    textshadow = "rgba(0, 0, 0, 0.7) 0 0 5px, rgba(0, 0, 0, 0.7) 0 0 10px";
+                } else if (overlay.type.toLowerCase() === "text") {
                     $olay = $("<span></span>").text(overlay.content);
                 } else if (overlay.type.toLowerCase() === "clock") {
                     $olay = $("<span></span>").css({"line-height": (osize * 0.8) + "px"});
@@ -131,9 +147,17 @@ function(
                     $("<span></span>").css({"font-size": (osize * 0.6) + "px", transform: "translateY(-20%)"}).text(overlay.content).appendTo($olay);
                 }
 
-                $olay.attr("id", id).css(map.config.ocss).css({"white-space":"nowrap", "text-align": "center", color: color, "text-shadow": "1px 1px 0 black", transform: "translateX(-50%)", position: "absolute",top: (xy.y - (osize/2))+"px", left: xy.x+"px", "font-size": osize+"px"});
+                $olay.attr("id", id).css(map.config.ocss).css({"white-space":"nowrap", "text-align": "center", color: color, "text-shadow": textshadow 
+                , transform: "translateX(-50%)", position: "absolute",top: (xy.y - (osize/2))+"px", left: xy.x+"px", "font-size": osize+"px"});
                 $olay.appendTo(map.$wrap);
-
+                if (overlay.hasOwnProperty("tooltip")) {
+                    $olay.attr("title", overlay.tooltip);
+                    //try {
+                    new Tooltip($olay, {placement: 'auto', html: true, title: overlay.tooltip});
+                        //$olay.tooltip(;
+                    //} catch(e) {}
+                    
+                }
 
                 // this.olays.push({
                 //     title: val[1],
@@ -215,7 +239,10 @@ function(
                 lightsOpacity: options.lightsOpacity,
                 sunOpacity: options.sunOpacity
             };         
-            if (this.options.landcoloring === "auto") {
+            if (this.options.landcoloring === "autol") {
+                this.options.landColorLeft = this.colorLuminance(this.options.bgColorLeft, 0.2);
+                this.options.landColorRight = this.colorLuminance(this.options.bgColorRight, 0.2);
+            } else if (this.options.landcoloring === "autod") {
                 this.options.landColorLeft = this.colorLuminance(this.options.bgColorLeft, -0.2);
                 this.options.landColorRight = this.colorLuminance(this.options.bgColorRight, -0.2);
             }
