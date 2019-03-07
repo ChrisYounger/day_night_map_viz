@@ -5,7 +5,7 @@ define([
     'moment-timezone',
     'd3',
     'topojson',
-    'tooltip.js',
+    'tippy.js',
     'api/SplunkVisualizationBase',
     'api/SplunkVisualizationUtils'
 ],
@@ -15,7 +15,7 @@ function(
     momenttz,
     d3,
     topojson,
-    Tooltip,
+    tippy,
     SplunkVisualizationBase,
     vizUtils
 ) {
@@ -147,16 +147,22 @@ function(
                     $("<span></span>").css({"font-size": (osize * 0.6) + "px", transform: "translateY(-20%)"}).text(overlay.content).appendTo($olay);
                 }
 
-                $olay.attr("id", id).css(map.config.ocss).css({"white-space":"nowrap", "text-align": "center", color: color, "text-shadow": textshadow 
-                , transform: "translateX(-50%)", position: "absolute",top: (xy.y - (osize/2))+"px", left: xy.x+"px", "font-size": osize+"px"});
+                $olay.attr("id", id).css(map.config.ocss).css({
+                    "white-space":"nowrap", 
+                    "text-align": "center", 
+                    "color": color, 
+                    "text-shadow": textshadow, 
+                    "transform": "translateX(-50%)", 
+                    "position": "absolute",
+                    "top": (xy.y - (osize/2))+"px",
+                    "left": xy.x+"px", 
+                    "font-size": osize+"px"
+                });
                 $olay.appendTo(map.$wrap);
                 if (overlay.hasOwnProperty("tooltip")) {
-                    $olay.attr("title", overlay.tooltip);
-                    //try {
-                    new Tooltip($olay, {placement: 'auto', html: true, title: overlay.tooltip});
-                        //$olay.tooltip(;
-                    //} catch(e) {}
-                    
+                    tippy($olay[0], {
+                        content: overlay.tooltip,
+                    });
                 }
 
                 // this.olays.push({
