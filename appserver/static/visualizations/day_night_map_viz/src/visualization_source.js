@@ -1,4 +1,3 @@
-
 define([
     'jquery',
     'moment',
@@ -20,12 +19,13 @@ function(
     vizUtils
 ) {
     require("d3-geo-projection/d3.geo.projection");
-
     var sun_map_viz = {
+        redraw_count: 0,
+        
         initialize: function() {
             SplunkVisualizationBase.prototype.initialize.apply(this, arguments);
             this.$container_wrap = $(this.el);
-
+            this.map_id = Math.round(Math.random() * 100000);
             this.$container = $("<div class='day_night_map-container'></div>").appendTo(this.$container_wrap);
         },
 
@@ -37,13 +37,13 @@ function(
             var map = this;
             map.config = {
                 size: "",
-                showcities: "true",
                 sizemultiplier: "1",
                 color: "#525f83",
-                bgcolor: "#2c3856",
                 fontstyle: "bold",
                 landcoloring: "autod",
                 shadowOpacity: "0.16",
+                overlayDropOpacity: "0.8",
+                clockFormat: "h:mm a",
                 landColorLeft: "",
                 landColorRight: "",
                 bgColorLeft: '#42448A',
@@ -58,10 +58,7 @@ function(
                     map.config[ opt.replace(map.getPropertyNamespaceInfo().propertyNamespace,'') ] = config[opt];
                 }
             }
-            map.config.ocss = {};
-            if (map.config.fontstyle === "bold") {
-                map.config.ocss = {"font-weight": 700};
-            }
+            map.data = data;
             this.scheduleDraw();    
         },
         // debounce the draw
@@ -70,17 +67,23 @@ function(
             clearTimeout(map.drawtimeout);
             map.drawtimeout = setTimeout(function(){
                 map.doDraw();
-            }, 100);
+            }, 150);
         },
         doDraw: function() {
             var map = this;
+            map.redraw_count ++;
+            //console.log("map: " + map.map_id + " draw #" + map.redraw_count, "size:", map.$container_wrap.height(), " isUnderBody", map.$container_wrap.parents().is("body"));
             if (map.hasOwnProperty("daylightmap")) {
-                console.log("stopping timers");
-                map.daylightmap.stop();
                 clearInterval(map.clockInterval);
+                clearInterval(map.mapInterval);
+                map.$container.empty();
+            }
+            // Dont draw unless this is a real element under body
+            if (! map.$container_wrap.parents().is("body")) {
+                return;
             }
 
-            this.$container_wrap.css({"background-color": map.config.bgcolor});
+            //map.$container_wrap.css({"background-color": map.config.bgcolor});
             // Figure out the size
             if (map.config.size > 0) {
                 map.config.height = map.config.size;
@@ -89,43 +92,46 @@ function(
             }
             map.config.width = (map.config.height * 2);
 
-            map.$container.empty();
             map.$wrap = $("<div class='day_night_map-wrap'></div>").css({"width": map.config.width+"px", "height": map.config.height+"px"}).appendTo(map.$container);     
             map.$svg = $("<svg class='day_night_map-svg'></svg>").appendTo(map.$wrap);     
 
-// TODO overlay is still flickering                       
-
             map.daylightmap = new DaylightMap(map.$svg[0], map.config, map.$container_wrap);
-            map.daylightmap.init();
+            map.mapInterval = map.daylightmap.init();
 
             map.updateClocks();
             map.clockInterval = setInterval(function(){
                 map.updateClocks();
             }, 1000);
-                
-            var overlays = [
-                //{lat: -27.3818631, lon: 152.7130211, type:"clock", content: "Brisbane", timezone: "Australia/Brisbane", size: 2},
-                //{lat: 51.5285582, lon: -0.2416783, type:"clock", content: "London", timezone: "Europe/London", color: "#00cc00"},
-                //{lat: 39.372883, lon: -73.9391617, type:"text", content: "New York"},
-                //{lat: 39.372883, lon: -73.9391617, type:"clock", content: "New York", timezone: "America/New_York"},
-                //{lat: 34.0203996, lon: -118.5518137, type:"clock", content: "Los Angeles", timezone: "America/Los_Angeles", size: 0.6},
-               // {lat: 39.372883, lon: -73.9391617, type:"icon", content: "map-marker-alt", size: 2, color: "#00cc00"},
-                
-                {lat: -27.3818631, lon: 152.7130211, type:"icon", content: "times-circle", size: 1, color: "#dc4e41", tooltip: "This is a test"},
-                {lat: -37.9722342, lon: 144.7729631, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a <bold>test</bold>"},
-                {lat: -12.4258984, lon: 130.8982891, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
-                {lat: -32.0397559, lon: 115.6813616, type:"icon", content: "exclamation-triangle", size: 1, color: "#f8be34", tooltip: "This is a test very long tooltip it is super duper long lorum ipsum going to the beach"}, 
-                {lat: -35.0004451, lon: 138.3309867, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
-                {lat: 39.372883, lon: -73.9391617, type:"icon", content: "check-square", size: 1, color: "#00cc00", tooltip: "This is a test"},
 
-                
-            ];
-            // TODO First remove all existing overlays
+            var overlays = map.data.results;
+            // TODO First remove all existing overlays (the whole map is redrawn anyway)
             overlays.forEach((overlay, i) => {
-                const xy = map.daylightmap.coordToXY([parseFloat(overlay.lat), parseFloat(overlay.lon)]);
-                const id = "olay-" + String(overlay.lat).replace(/\D+/g,'') +"-"+ String(overlay.lon).replace(/\D+/g,'');
+                var missing_mandatory_fields = [];
+                if (!(overlay.hasOwnProperty("lat") || overlay.hasOwnProperty("x"))) {
+                    missing_mandatory_fields.push('lat (or x)');
+                }
+                if (!(overlay.hasOwnProperty("lon") || overlay.hasOwnProperty("y"))) {
+                    missing_mandatory_fields.push('lon (or y)');
+                }
+                if (!overlay.hasOwnProperty("type")) {
+                    missing_mandatory_fields.push('type');
+                }
+                if (!overlay.hasOwnProperty("content")) {
+                    missing_mandatory_fields.push('content');
+                }                
+                if (missing_mandatory_fields.length) {
+                    console.log(`Row ${i} in data is missing mandatory field/s [${missing_mandatory_fields.join(",")}] and will be ignored.`);
+                    return;
+                }
+                var xy;
+                if (overlay.hasOwnProperty("lat") && overlay.hasOwnProperty("lon")) {
+                    xy = map.daylightmap.coordToXY([parseFloat(overlay.lat), parseFloat(overlay.lon)]);
+                } else {
+                    xy = map.daylightmap.percToXY([parseFloat(overlay.x), parseFloat(overlay.y)]);
+                }
+                var id = "olay-" + String(xy.x).replace(/\D+/g,'') +"-"+ String(xy.y).replace(/\D+/g,'');
                 // scale overlay size with map size and also multiplier
-                var osize = (parseFloat(map.config.sizemultiplier) * 14) * (map.config.height / 500);
+                var osize = (parseFloat(map.config.sizemultiplier) * 16) * (map.config.height / 500);
                 if (overlay.hasOwnProperty("size")) {
                     osize = osize * parseFloat(overlay.size);
                 }
@@ -133,47 +139,60 @@ function(
                 if (overlay.hasOwnProperty("color")) {
                     color = overlay.color;
                 }
-                var textshadow = "rgb(0, 0, 0) 1px 1px 0";
+                var shadow = map.config.overlayDropOpacity;
+                if (overlay.hasOwnProperty("shadow")) {
+                    shadow = overlay.shadow;
+                }
+                var weight = map.config.fontstyle;
+                if (overlay.hasOwnProperty("weight")) {
+                    weight = overlay.weight;
+                }                
+                var textshadow = "rgba(0,0,0," + shadow + ") 1px 1px 0";
                 var $olay;
                 if (overlay.type.toLowerCase() === "icon") {
-                    $olay = $("<i></i>").addClass("fas fa-" + overlay.content);
-                    textshadow = "rgba(0, 0, 0, 0.7) 0 0 5px, rgba(0, 0, 0, 0.7) 0 0 10px";
+                    var parts = overlay.content.split(" ");
+                    $olay = $("<i></i>");
+                    if (parts.length === 1){
+                        $olay.addClass("fas fa-" + overlay.content);
+                    } else {
+                        $olay.addClass(overlay.content);
+                    }
+                    textshadow = "rgba(0,0,0," + shadow + ") 0 0 " + (osize / 3) + "px, rgba(0,0,0," +  + shadow + ") 0 0 " + (osize / 2) + "px";
+
                 } else if (overlay.type.toLowerCase() === "text") {
                     $olay = $("<span></span>").text(overlay.content);
+
                 } else if (overlay.type.toLowerCase() === "clock") {
                     $olay = $("<span></span>").css({"line-height": (osize * 0.8) + "px"});
-                    map.config.clocks[id] = {dom: $("<span></span>").appendTo($olay), tz: overlay.timezone};
+                    if (overlay.timezone && ! moment.tz.zone(overlay.timezone)) {
+                        $olay.text("Unknown timezone");
+                    } else {
+                        map.config.clocks[id] = {dom: $("<span></span>").appendTo($olay), tz: overlay.timezone};
+                    }
                     $("<br>").appendTo($olay)
                     $("<span></span>").css({"font-size": (osize * 0.6) + "px", transform: "translateY(-20%)"}).text(overlay.content).appendTo($olay);
                 }
-
-                $olay.attr("id", id).css(map.config.ocss).css({
+                var ocss = {
                     "white-space":"nowrap", 
                     "text-align": "center", 
                     "color": color, 
                     "text-shadow": textshadow, 
                     "transform": "translateX(-50%)", 
                     "position": "absolute",
-                    "top": (xy.y - (osize/2))+"px",
-                    "left": xy.x+"px", 
+                    "top": (xy.y - (osize/2)) + "px",
+                    "left": xy.x + "px", 
                     "font-size": osize+"px"
-                });
+                };
+                if (overlay.type.toLowerCase() !== "icon") {
+                    ocss["font-weight"] = weight;
+                }                
+                $olay.attr("id", id).css(ocss);
                 $olay.appendTo(map.$wrap);
                 if (overlay.hasOwnProperty("tooltip")) {
                     tippy($olay[0], {
                         content: overlay.tooltip,
                     });
                 }
-
-                // this.olays.push({
-                //     title: val[1],
-                //     country: val[5],
-                //     latlng: coords,
-                //     xy,
-                //     population: parseInt(val[0]),
-                //     id,
-                //     opacity
-                // });
             });            
         },
 
@@ -185,7 +204,7 @@ function(
                     if (map.config.clocks[clock].tz){
                         now.tz(map.config.clocks[clock].tz);
                     }
-                    map.config.clocks[clock].dom.text(now.format("h:mm a"));
+                    map.config.clocks[clock].dom.text(now.format(map.config.clockFormat));
                 }
             }
         },
@@ -204,7 +223,7 @@ function(
         // Search data params
         getInitialDataParams: function() {
             return ({
-                outputMode: SplunkVisualizationBase.COLUMN_MAJOR_OUTPUT_MODE,
+                outputMode: SplunkVisualizationBase.RAW_OUTPUT_MODE,
                 count: 10000
             });
         }
@@ -212,6 +231,17 @@ function(
 
 
     /*
+
+  _____              _ _       _     _   __  __             
+ |  __ \            | (_)     | |   | | |  \/  |            
+ | |  | | __ _ _   _| |_  __ _| |__ | |_| \  / | __ _ _ __  
+ | |  | |/ _` | | | | | |/ _` | '_ \| __| |\/| |/ _` | '_ \ 
+ | |__| | (_| | |_| | | | (_| | | | | |_| |  | | (_| | |_) |
+ |_____/ \__,_|\__, |_|_|\__, |_| |_|\__|_|  |_|\__,_| .__/ 
+                __/ |     __/ |                      | |    
+               |___/     |___/                       |_|    
+
+
     * decaffeinate suggestions:
     * DS102: Remove unnecessary code created because of implicit returns
     * DS206: Consider reworking classes to avoid initClass
@@ -368,6 +398,12 @@ function(
             return { x, y };
         }
 
+        percToXY(coord) {
+            const x = parseFloat(coord[0]) / 100 * this.MAP_WIDTH;
+            const y = parseFloat(coord[1]) / 100 * this.MAP_HEIGHT;
+            return { x, y };
+        }
+
         getCityOpacity(coord) {
             if (SunCalc.getPosition(this.currDate, coord[0], coord[1]).altitude > 0) {
                 return 0;
@@ -423,12 +459,14 @@ function(
                 .attr('x2', '100%')
                 .attr('y2', '0%');
 
-            d3.select('#gradient')
+            d3.select(this.svg)
+                .select('#gradient')
                 .append('stop')
                 .attr('offset', '0%')
                 .attr('stop-color', this.options.bgColorLeft);
 
-            d3.select('#gradient')
+            d3.select(this.svg)
+                .select('#gradient')
                 .append('stop')
                 .attr('offset', '100%')
                 .attr('stop-color', this.options.bgColorRight);
@@ -442,12 +480,14 @@ function(
                 .attr('x2', '100%')
                 .attr('y2', '0%');
 
-            d3.select('#landGradient')
+            d3.select(this.svg)
+                .select('#landGradient')
                 .append('stop')
                 .attr('offset', '0%')
                 .attr('stop-color', this.options.landColorLeft);
 
-            d3.select('#landGradient')
+            d3.select(this.svg)
+                .select('#landGradient')
                 .append('stop')
                 .attr('offset', '100%')
                 .attr('stop-color', this.options.landColorRight);
@@ -457,13 +497,15 @@ function(
                 .append('radialGradient')
                 .attr('id', 'radialGradient');
 
-            d3.select('#radialGradient')
+            d3.select(this.svg)
+                .select('#radialGradient')
                 .append('stop')
                 .attr('offset', '0%')
                 .attr('stop-opacity', this.options.sunOpacity)
                 .attr('stop-color', "rgb(255, 255, 255)");
 
-            return d3.select('#radialGradient')
+            d3.select(this.svg)
+                .select('#radialGradient')
                 .append('stop')
                 .attr('offset', '100%')
                 .attr('stop-opacity', 0)
@@ -471,7 +513,7 @@ function(
         }
 
         drawSVG() {
-            return d3.select(this.svg)
+            d3.select(this.svg)
                 .attr('width', this.MAP_WIDTH)
                 .attr('height', this.MAP_HEIGHT)
                 .attr('viewBox', `0 0 ${this.MAP_WIDTH} ${this.MAP_HEIGHT}`)
@@ -483,7 +525,7 @@ function(
 
         drawSun() {
             const xy = this.getSunPosition();
-            return d3.select(this.svg)
+            d3.select(this.svg)
                 .append('circle')
                 .attr('cx', xy.x)
                 .attr('cy', xy.y)
@@ -495,7 +537,7 @@ function(
 
         drawPath() {
             const path = this.getPathString(this.isNorthSun());
-            return d3.select(this.svg)
+            d3.select(this.svg)
                 .append('path')
                 .attr('id', 'nightPath')
                 .attr('fill', "rgb(0,0,0)")
@@ -508,16 +550,13 @@ function(
                 .scale(this.PROJECTION_SCALE)
                 .translate([this.MAP_WIDTH / 2, this.MAP_HEIGHT /2])
                 .precision(0.1);
-
             const worldPath = d3.geo.path().projection(projection);
-
             d3.select(this.svg)
                 .append('path')
                 .attr('id', 'land')
                 .attr('fill', 'url(#landGradient)')
                 .datum(topojson.feature(WORLD_PATHS, WORLD_PATHS.objects.land))
                 .attr('d', worldPath);
-
             // Asynchronous so re-order the elements here.
             $('#land').insertBefore('#nightPath');
             $('#sun').insertBefore('#land');
@@ -539,7 +578,6 @@ function(
                     .attr('r', radius)
                     .attr('opacity', opacity * this.options.lightsOpacity)
                     .attr('fill', this.options.lightsColor);
-
                 this.cities.push({
                     title: val[1],
                     country: val[5],
@@ -552,26 +590,15 @@ function(
             });
         }
 
-        searchCities(str) {
-            let cities = _.filter(this.cities, val => val.title.toLowerCase().indexOf(str) === 0);
-            cities = _.sortBy(cities, val => val.population);
-            return cities.reverse();
-        }
-
         redrawSun(animate) {
             const xy = this.getSunPosition();
-            const curX = parseInt(d3.select("#sun").attr('cx'));
-
-            if (animate && ((Math.abs(xy.x - curX)) < (this.MAP_WIDTH * 0.8))) {
-
-                return d3.select("#sun")
+            const curX = parseInt(d3.select(this.svg).select("#sun").attr('cx'));
+            if (((Math.abs(xy.x - curX)) < (this.MAP_WIDTH * 0.8))) {
+                d3.select(this.svg)
+                    .select("#sun")
                     .transition()
                     .duration(this.options.tickDur)
                     .ease('linear')
-                    .attr('cx', xy.x)
-                    .attr('cy', xy.y);
-            } else {
-                return d3.select("#sun")
                     .attr('cx', xy.x)
                     .attr('cy', xy.y);
             }
@@ -584,7 +611,8 @@ function(
                 if (val.opacity !== opacity) {
                     this.cities[i].opacity = opacity;
                     k++;
-                    return d3.select(`#${val.id}`)
+                    d3.select(this.svg)
+                        .select(`#${val.id}`)
                         .transition()
                         .duration(this.options.tickDur * 2)
                         .attr('opacity', this.options.lightsOpacity * opacity);
@@ -592,66 +620,68 @@ function(
             });
         }
 
-        redrawPath(animate) {
+        redrawPath() {
             const path = this.getPathString(this.isNorthSun(this.currDate));
-            const nightPath = d3.select('#nightPath');
-            if (animate) {
-                return nightPath.transition()
-                    .duration(this.options.tickDur)
-                    .ease('linear')
-                    .attr('d', path);
-            } else {
-                return nightPath.attr('d', path);
-            }
+            const nightPath = d3.select(this.svg).select('#nightPath');
+            nightPath.transition()
+                .duration(this.options.tickDur)
+                .ease('linear')
+                .attr('d', path);
+
         }
 
-        redrawAll(increment, animate) {
-            if (increment == null) { increment = 15; }
-            if (animate == null) { animate = true; }
-            this.currDate.setMinutes(this.currDate.getMinutes() + increment);
-            this.redrawPath(animate);
-            this.redrawSun(animate);
-            return this.redrawCities();
+        redrawAll() {
+            if (this.options.shadowOpacity > 0) {
+                this.redrawPath();
+            }
+            if (this.options.sunOpacity > 0) {
+                this.redrawSun();
+            }
+            if (this.options.lightsOpacity > 0) {
+                this.redrawCities();
+            }
         }
 
         drawAll() {
             this.drawSVG();
             this.createDefs();
             this.drawLand();
-            this.drawPath();
-            this.drawSun();
-            return this.drawCities();
-        }
-
-        animate(increment) {
-            if (increment == null) { increment = 0; }
-            if (!this.isAnimating) {
-                this.isAnimating = true;
-                return this.animInterval1 = setInterval(() => {
-                    this.redrawAll(increment);
-                }, this.options.tickDur);
+            if (this.options.shadowOpacity > 0) {
+                this.drawPath();
             }
-        }
-
-        stop() {
-            this.isAnimating = false;
-            clearInterval(this.animInterval1);
-            clearInterval(this.animInterval2);
+            if (this.options.sunOpacity > 0) {
+                this.drawSun();
+            }
+            if (this.options.lightsOpacity > 0) {
+                this.drawCities();
+            }
         }
 
         init() {
             this.drawAll();
-            this.animInterval2 = setInterval(() => {
-                if (this.isAnimating) { return; }
-                this.redrawAll(1, false);
+            return setInterval(() => {
+                this.currDate = new Date();
+                this.redrawAll();
             }, 60000);
         }
     }
+
     DaylightMap.initClass();
 
 
 
     /*
+
+   _____                                   
+  / ____|                                  
+ | (___  _   _ _ __  _ __ ___   __ _ _ __  
+  \___ \| | | | '_ \| '_ ` _ \ / _` | '_ \ 
+  ____) | |_| | | | | | | | | | (_| | |_) |
+ |_____/ \__,_|_| |_|_| |_| |_|\__,_| .__/ 
+                                    | |    
+                                    |_|    
+
+
     (c) 2011-2015, Vladimir Agafonkin
     SunCalc is a JavaScript library for calculating sun/moon position and light phases.
     https://github.com/mourner/suncalc

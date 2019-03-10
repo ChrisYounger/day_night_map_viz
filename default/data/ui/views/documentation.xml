@@ -1,0 +1,174 @@
+<dashboard theme="light">
+<label>DayNightMap Viz - Documentation</label>
+<row>
+<panel>
+<viz type="day_night_map_viz.day_night_map_viz">
+<search>
+  <query>|makeresults | eval raw = "
+lat: -37.9722342, lon: 144.7729631, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"&lt;em&gt;Melbourne&lt;/em&gt;1\"
+lat: -32.0397559, lon: 115.6813616, type:\"icon\", content: \"exclamation-triangle\", size: 1, color: \"#f8be34\", tooltip: \"Perth\"
+lat: -27.3818631, lon: 152.7130211, type:\"icon\", content: \"times-circle\", size: 1, color: \"#dc4e41\", tooltip: \"Brisbane\"
+lat: 39.372883, lon: -73.9391617, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"New York\"
+lat: 51.5285582, lon: -0.2416783, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"London\"
+lat: 34.0897641, lon: -118.3873706, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"Los Angeles\"
+lat: -23.6823494, lon: -46.73538, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"São Paulo\"
+lat: 40.2504354, lon: 115.9086365, type:\"icon\", content: \"check-square\", size: 1, color: \"#00cc00\", tooltip: \"Beijing\"
+"|makemv delim="
+" raw |mvexpand raw|rename raw as _raw| extract pairdelim="," kvdelim=":"</query>
+  <earliest>-24h@h</earliest>
+  <latest>now</latest>
+  <sampleRatio>1</sampleRatio>
+</search>
+<option name="day_night_map_viz.day_night_map_viz.bgColorLeft">#42448A</option>
+<option name="day_night_map_viz.day_night_map_viz.bgColorRight">#376281</option>
+<option name="day_night_map_viz.day_night_map_viz.bgcolor">#2c3856</option>
+<option name="day_night_map_viz.day_night_map_viz.color">#ffffff</option>
+<option name="day_night_map_viz.day_night_map_viz.fontstyle">bold</option>
+<option name="day_night_map_viz.day_night_map_viz.landColorLeft">#35366e</option>
+<option name="day_night_map_viz.day_night_map_viz.landColorRight">#2c4e67</option>
+<option name="day_night_map_viz.day_night_map_viz.landcoloring">autod</option>
+<option name="day_night_map_viz.day_night_map_viz.lightsColor">#FFBEA0</option>
+<option name="day_night_map_viz.day_night_map_viz.lightsOpacity">0.2</option>
+<option name="day_night_map_viz.day_night_map_viz.shadowOpacity">0.16</option>
+<option name="day_night_map_viz.day_night_map_viz.sizemultiplier">1</option>
+<option name="day_night_map_viz.day_night_map_viz.sunOpacity">0.11</option>
+<option name="drilldown">none</option>
+<option name="height">350</option>
+<option name="trellis.enabled">0</option>
+<option name="trellis.scales.shared">1</option>
+<option name="trellis.size">medium</option>
+</viz>
+</panel>
+</row>
+<row>
+<panel>
+<html>
+<style>
+.day_night_map-example_icons .fas, .day_night_map-example_icons .far { 
+  margin: 6px;
+  font-size: 24px;
+  width: 34px;
+  display: inline-block;
+  text-align: center;
+}
+.day_night_map-example_icons li { 
+  list-style-type: none;
+  margin-bottom:6px;
+  width: 220px;
+}
+.day_night_map-example_icons { 
+  display: flex;
+}
+.default_value {
+  color: #333333;
+}
+.table td, .table th {
+  vertical-align: middle;
+}
+</style>
+<div style="max-width: 1200px; margin: 0 auto;">
+  <h2>Field reference</h2>
+  A table of data can be provided to this visualization to render overlays on the map. Either <code class="default_value">lat</code>/<code class="default_value">lon</code> or <code class="default_value">x</code>/<code class="default_value">y</code> must exist for each row.
+  <table class="table" >
+    <tr><td>Field</td><td>Valid values</td><td>Description</td></tr>
+    <tr><td><code>lat</code></td><td><code class="default_value">-180</code> to <code class="default_value">+180</code></td><td>Latitude coordinate for the overlay item.</td></tr>
+    <tr><td><code>lon</code></td><td><code class="default_value">-180</code> to <code class="default_value">+180</code></td><td>Longitude coordinate for the overlay item.</td></tr>
+    <tr><td><code>x</code></td><td><code class="default_value">0</code> to <code class="default_value">100</code></td><td>The X coordinate as a percentage (0=left, 100=right).</td></tr>
+    <tr><td><code>y</code></td><td><code class="default_value">0</code> to <code class="default_value">100</code></td><td>The Y coordinate as a percentage (0=top, 100=bottom).</td></tr>
+    <tr><td><code>type</code></td><td><code class="default_value">icon</code>, <code class="default_value">text</code>, <code class="default_value">clock</code></td><td>The overlay type</td></tr>
+    <tr><td><code>content</code></td><td><em>text</em></td><td>When type=<code class="default_value">text</code> this is the text content (can contain HTML).<br />When type=<code class="default_value">icon</code> this is the icon class (see section below).<br />When type=<code class="default_value">clock</code> this is the sub-text content.<br /></td></tr>
+    <tr><td><code>size</code></td><td><code class="default_value">0</code> +</td><td>(Optional) A multiplier of the default size for this item. </td></tr>
+    <tr><td><code>color</code></td><td><em>Valid css color</em></td><td>(Optional) Color of the item. </td></tr>
+    <tr><td><code>tooltip</code></td><td><em>text</em></td><td>(Optional) A tooltip to display on mouse hover (can contain HTML).</td></tr>
+    <tr><td><code>timezone</code></td><td><em>ISO timezone</em></td><td>(Optional) The timezone for the clock <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</a><br />In addition, can be specifed as <code class="default_value">etc/GMT+5:00</code></td></tr>
+    <tr><td><code>shadow</code></td><td><code class="default_value">0</code> to <code class="default_value">1</code></td><td>(Optional) Drop shadow opacity of the item. Set <code class="default_value">0</code> for no shadow.</td></tr>
+    <tr><td><code>weight</code></td><td><code class="default_value">normal</code>, <code class="default_value">bold</code></td><td>(Optional) Font-weight (clock and text types only).</td></tr>
+  </table>
+
+  <h2 style="margin-top: 40px;">Icons</h2>
+  <p>
+  Any icon from the FontAwesome v5 Free icon sets can be used. The complete list is here: <a href="https://fontawesome.com/cheatsheet/">https://fontawesome.com/cheatsheet/</a><br /> 
+  The "solid" icon set is the default, but the "regular" set can be used by prefixing <code>far fa-*</code>. Below are a list of the more useful icons that are available.
+  </p>
+  <div class="day_night_map-container day_night_map-example_icons" style="text-align: left; margin: 10px;">
+  <ul>
+  <li><i class="fas fa-check"/>check</li>
+  <li><i class="fas fa-check-circle"/>check-circle</li>
+  <li><i class="fas fa-check-double"/>check-double</li>
+  <li><i class="fas fa-check-square"/>check-square</li>
+  <li><i class="fas fa-times"/>times</li>
+  <li><i class="fas fa-times-circle"/>times-circle</li>
+  <li><i class="fas fa-window-close"/>window-close</li>
+  <li><i class="fas fa-exclamation-triangle"/>exclamation-triangle</li>
+  <li><i class="fas fa-exclamation-circle"/>exclamation-circle</li>
+  </ul><ul>
+  <li><i class="far fa-check-circle"/>far fa-check-circle</li>
+  <li><i class="far fa-check-square"/>far fa-check-square</li>
+  <li><i class="far fa-times-circle"/>far fa-times-circle</li>
+  <li><i class="far fa-window-close"/>far fa-window-close</li>
+  <li><i class="fas fa-exclamation"/>exclamation</li>
+  <li><i class="fas fa-info"/>info</li>
+  <li><i class="fas fa-user-check"/>user-check</li>
+  <li><i class="fas fa-user-times"/>user-times</li>
+  </ul><ul>
+  <li><i class="fas fa-thumbs-up"/>thumbs-up</li>
+  <li><i class="fas fa-thumbs-down"/>thumbs-down</li>
+  <li><i class="far fa-thumbs-up"/>far fa-thumbs-up</li>
+  <li><i class="far fa-thumbs-down"/>far fa-thumbs-down</li>
+  <li><i class="fas fa-frown"/>frown</li>
+  <li><i class="fas fa-smile"/>smile</li>
+  <li><i class="far fa-frown"/>far fa-frown</li>
+  <li><i class="far fa-smile"/>far fa-smile</li>
+  </ul><ul>
+  <li><i class="fas fa-flag-checkered"/>flag-checkered</li>
+  <li><i class="fas fa-flag"/>flag</li>
+  <li><i class="far fa-flag"/>far fa-flag</li>
+  <li><i class="fas fa-map-marker"/>map-marker</li>
+  <li><i class="fas fa-map-marker-alt"/>map-marker-alt</li>
+  <li><i class="fas fa-map-pin"/>map-pin</li>
+  <li><i class="fas fa-map-signs"/>map-signs</li>
+  </ul>
+  </div>
+  <h2 style="margin-top: 40px;">Example color sets</h2>
+<table class="table">
+<thead>
+<tr>
+<th>Preview</th>
+<th>Water color<br />(from)</th>
+<th>Water color<br />(to)</th>
+<th>Land<br />coloring</th>
+<th>Land color<br />(from)</th>
+<th>Land color<br />(to)</th>
+<th>Cities</th>
+<th>Other</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><img src="/splunkd/__raw/servicesNS/admin/day_night_map_viz/static/map_style1.png" style="width:400px" /></td><td><code class="default_value">c7e5fa</code></td><td><code class="default_value">c7e5fa</code></td><td>Custom</td><td><code class="default_value">efe9e1</code></td><td><code class="default_value">efe9e1</code></td><td><em>Blank (off)</em></td><td>Sun=<em>blank</em>,<br />Shadow=<code class="default_value">0.1</code></td></tr>
+<tr><td><img src="/splunkd/__raw/servicesNS/admin/day_night_map_viz/static/map_style2.png" style="width:400px" /></td><td><code class="default_value">233858</code></td><td><code class="default_value">233858</code></td><td>Custom</td><td><code class="default_value">0770c8</code></td><td><code class="default_value">0770c8</code></td><td><code class="default_value">3ebeec</code></td><td></td></tr>
+<tr><td><img src="/splunkd/__raw/servicesNS/admin/day_night_map_viz/static/map_style3.png" style="width:400px" /></td><td><code class="default_value">191a1a</code></td><td><code class="default_value">191a1a</code></td><td>Custom</td><td><code class="default_value">454545</code></td><td><code class="default_value">454545</code></td><td><code class="default_value">F8BE34</code></td><td></td></tr>
+</tbody>
+</table>
+  <h2 style="margin-top: 40px;">Example searches</h2>
+Clocks across top. (using x/y positioning)
+<div style='font-family: Consolas, "Courier New", monospace; font-weight: normal; font-size: 14px; line-height: 19px; letter-spacing: 0px; color:rgb(212, 212, 212); background-color:rgb(30, 30, 30);padding:10px;margin:5px;'><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">makeresults</span><span style="color: #d4d4d4;">   </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">eval</span><span style="color: #d4d4d4;"> raw = </span><span style="color: #ce9178;">"<br />
+x=17, y=12, type=clock, content=Pacific, timezone=America/Los_Angeles ### <br />
+x=29, y=12, type=clock, content=Eastern, timezone=America/New_York ### <br />
+x=50, y=12, type=clock, content=UTC/GMT, timezone=UTC ### <br />
+x=73, y=12, type=clock, content=IST, timezone=Etc/Gmt+5 ### <br />
+x=90, y=12, type=clock, content=AEDST, timezone=Australia/Sydney ### <br />
+"</span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">makemv</span><span style="color: #d4d4d4;"> </span><span style="color: #3dc9b0;">delim</span><span style="color: #d4d4d4;">=</span><span style="color: #ce9178;">"###"</span><span style="color: #d4d4d4;"> raw</span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">mvexpand</span><span style="color: #d4d4d4;"> raw </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">rename</span><span style="color: #d4d4d4;"> raw  </span><span style="color: #dd6a6f;">as</span><span style="color: #d4d4d4;">  _raw </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">extract</span><span style="color: #d4d4d4;"> </span></span><br/></div>
+
+Clocks at locations, with different colors and sizes.
+<div style='font-family: Consolas, "Courier New", monospace; font-weight: normal; font-size: 14px; line-height: 19px; letter-spacing: 0px; color:rgb(212, 212, 212); background-color:rgb(30, 30, 30);padding:10px;margin:5px;'><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">makeresults</span><span style="color: #d4d4d4;">   </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">eval</span><span style="color: #d4d4d4;"> raw = </span><span style="color: #ce9178;">"<br />
+lat=-27.3818631, lon=152.7130211, type=clock, content=Brisbane, timezone=Australia/Brisbane, size=0.8 ### <br />
+lat=51.5285582, lon=-0.2 416783, type=clock, content=London, timezone=Europe/London, color=#00cc00 ###  <br />
+lat=39.372883, lon=-73.9391617, type=clock, content=\"New York\", timezone=America/New_York, size=1.5, color=#F1813F  ###  <br />
+lat=34.0203996, lon=-118.5518137, type=clock, content=\"Los Angeles\", timezone=America/Los_Angeles, color=#DC4E41 ### <br />
+"</span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">makemv</span><span style="color: #d4d4d4;"> </span><span style="color: #3dc9b0;">delim</span><span style="color: #d4d4d4;">=</span><span style="color: #ce9178;">"###"</span><span style="color: #d4d4d4;"> raw</span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">mvexpand</span><span style="color: #d4d4d4;"> raw </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">rename</span><span style="color: #d4d4d4;"> raw  </span><span style="color: #dd6a6f;">as</span><span style="color: #d4d4d4;">  _raw </span></span><br/><span><span style="color: #d4d4d4;font-weight: bold;">|</span><span style="color: #d4d4d4;"> </span><span style="color: #569cd6;font-weight: bold;">extract</span><span style="color: #d4d4d4;"> </span></span><br/></div>
+
+</div>
+</html>
+</panel>
+</row>
+</dashboard>

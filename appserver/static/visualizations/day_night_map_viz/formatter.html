@@ -1,14 +1,12 @@
 <form class="splunk-formatter-section" section-label="General">
-    
-    <splunk-control-group label="Map Base size" help="Leave blank to auto-fit available space">
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.size" value=""></splunk-text-input>
+    <splunk-control-group label="Map size" help="Leave blank to auto-fit available space">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.size" value="" style="width: 64px;  vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
     </splunk-control-group>
-
+    <div class="divider" />
     <splunk-control-group label="Overlays size multiplier">
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.sizemultiplier" value="1"></splunk-text-input>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.sizemultiplier" value="1" style="width: 32px;  vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
     </splunk-control-group>
-
-   <splunk-control-group label="Overlays color">
+    <splunk-control-group label="Overlays color">
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color" value="#ffffff" type="splunkCategorical">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
@@ -23,35 +21,25 @@
             <splunk-color>#525f83</splunk-color>
         </splunk-color-picker>        
     </splunk-control-group>
-
+    <splunk-control-group label="Overlays shadow opacity">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.overlayDropOpacity" value="0.8" style="width: 32px; vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
+    </splunk-control-group>
     <splunk-control-group label="Overlays font">
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.fontstyle" value="bold">
-            <option value="normal">Normal</option>
-            <option value="bold">Bold</option>
+            <option value="400">Normal</option>
+            <option value="700">Bold</option>
         </splunk-radio-input> 
     </splunk-control-group>
-
-   <splunk-control-group label="Background color">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.bgcolor" value="#2c3856" type="splunkCategorical">
-            <splunk-color>#000000</splunk-color>
-            <splunk-color>#5C6773</splunk-color>
-            <splunk-color>#C3CBD4</splunk-color>
-            <splunk-color>#F2F4F5</splunk-color>
-            <splunk-color>#ffffff</splunk-color>
-            <splunk-color>#DC4E41</splunk-color>
-            <splunk-color>#F1813F</splunk-color>
-            <splunk-color>#F8BE34</splunk-color>
-            <splunk-color>#53A051</splunk-color>
-            <splunk-color>#006D9C</splunk-color>
-            <splunk-color>#42448A</splunk-color>
-        </splunk-color-picker>        
-    </splunk-control-group>    
+    <div class="divider" />
+    <splunk-control-group label="Clock format">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.clockFormat" value="h:mm a" style="width: 80px; vertical-align:top; display:inline-block; flex: none; margin-right: 20px;"></splunk-text-input>
+        <span style="display:inline-block; margin:5px;"><a href="https://momentjs.com/docs/#/displaying/format/" target="_blank">Moment.js syntax</a></span>
+    </splunk-control-group>
 </form>
 
-
-<form class="splunk-formatter-section" section-label="Map styles">
-    <splunk-control-group label="Map color gradient left">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.bgColorLeft" value="#42448A" type="splunkCategorical">
+<form class="splunk-formatter-section" section-label="Map">
+    <splunk-control-group label="Water color gradient">
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.bgColorLeft" value="#42448A" type="splunkCategorical" style="vertical-align:top; display:inline-block;">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
             <splunk-color>#C3CBD4</splunk-color>
@@ -64,10 +52,8 @@
             <splunk-color>#006D9C</splunk-color>            
             <splunk-color>#42448A</splunk-color>
         </splunk-color-picker>
-    </splunk-control-group>
-
-    <splunk-control-group label="Map color gradient right">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.bgColorRight" value="#376281" type="splunkCategorical">
+        <span style="display:inline-block; margin:5px;">to</span>
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.bgColorRight" value="#376281" type="splunkCategorical" style="vertical-align:top; display:inline-block;">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
             <splunk-color>#C3CBD4</splunk-color>
@@ -81,7 +67,6 @@
             <splunk-color>#376281</splunk-color>
         </splunk-color-picker>
     </splunk-control-group>
-
    <splunk-control-group label="Land coloring">
         <splunk-select name="{{VIZ_NAMESPACE}}.landcoloring" value="autod">
             <option value="autol">Auto lighter</option>
@@ -89,9 +74,8 @@
             <option value="custom">Custom</option>
         </splunk-select>
     </splunk-control-group>
-
-    <splunk-control-group label="Land color gradient left">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.landColorLeft" value="#35366e" type="splunkCategorical">
+    <splunk-control-group label="Land color gradient">
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.landColorLeft" value="#35366e" type="splunkCategorical" style="vertical-align:top; display:inline-block;">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
             <splunk-color>#C3CBD4</splunk-color>
@@ -104,10 +88,8 @@
             <splunk-color>#006D9C</splunk-color>            
             <splunk-color>#35366e</splunk-color>
         </splunk-color-picker>
-    </splunk-control-group>
-
-    <splunk-control-group label="Land color gradient right">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.landColorRight" value="#2c4e67" type="splunkCategorical">
+        <span style="display:inline-block; margin:5px;">to</span>
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.landColorRight" value="#2c4e67" type="splunkCategorical" style="vertical-align:top; display:inline-block;">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
             <splunk-color>#C3CBD4</splunk-color>
@@ -120,10 +102,10 @@
             <splunk-color>#006D9C</splunk-color>            
             <splunk-color>#2c4e67</splunk-color>
         </splunk-color-picker>
-    </splunk-control-group>    
-
-    <splunk-control-group label="Cities color">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.lightsColor" value="#FFBEA0" type="splunkCategorical">
+    </splunk-control-group>
+    <div class="divider" />
+    <splunk-control-group label="Cities">
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.lightsColor" value="#FFBEA0" type="splunkCategorical" style="vertical-align:top; display:inline-block;">
             <splunk-color>#000000</splunk-color>
             <splunk-color>#5C6773</splunk-color>
             <splunk-color>#C3CBD4</splunk-color>
@@ -136,35 +118,22 @@
             <splunk-color>#006D9C</splunk-color>            
             <splunk-color>#FFBEA0</splunk-color>
         </splunk-color-picker>
+        <span style="display:inline-block; margin:5px;">Opacity</span>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.lightsOpacity" value="0.5" style="width: 32px; vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
     </splunk-control-group>
-
-    <splunk-control-group label="Shadow opacity">
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.shadowOpacity" value="0.16"></splunk-text-input>
+    <div class="divider" />
+    <splunk-control-group label="Night opacity">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.shadowOpacity" value="0.16" style="width: 32px; vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
     </splunk-control-group>
-
-    <splunk-control-group label="Cities opacity" help="Set to 0 to disable">
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.lightsOpacity" value="0.5"></splunk-text-input>
+    <splunk-control-group label="Sun opacity">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.sunOpacity" value="0.11" style="width: 32px; vertical-align:top; display:inline-block; flex: none; margin-right: 26px;"></splunk-text-input>
     </splunk-control-group>
-
-    <splunk-control-group label="Sun opacity" help="Set to 0 to disable">
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.sunOpacity" value="0.11"></splunk-text-input>
-    </splunk-control-group>
-
 </form>
-
 
 <form class="splunk-formatter-section" section-label="Help">
 	<splunk-control-group label=" ">
         <div>
-            <p>TODO <a href="https://momentjs.com/docs/#/displaying/format/" target="_blank">Moment.js syntax</a></p>
-            <p>Examples:</p>
-            <p>
-                <code style='display:inline-block; width: 90px; margin-right:10px;'>HH:mm:ss</code> 15:30:10<br />
-                <code style='display:inline-block; width: 90px; margin-right:10px;'>h:mm:ss a</code> 3:30:10 pm<br />
-                <code style='display:inline-block; width: 90px; margin-right:10px;'>Do MMMM YYYY</code> 23rd February 2019<br />
-                <code style='display:inline-block; width: 90px; margin-right:10px;'>D MMM</code> 23 Feb<br />
-                <code style='display:inline-block; width: 90px; margin-right:10px;'>MM/D/YY</code> 02/23/19
-            </p>
+            <p><a href="/app/day_night_map_viz/documentation" target="_blank">Documentation</a></p>
         </div>
 	</splunk-control-group>
 </form>
