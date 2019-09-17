@@ -214,12 +214,6 @@ function(
             this.scheduleDraw();
         },
 
-        setSize: function(newContSize){
-            newContSize = parseFloat(newContSize);
-            clk.$elem.attr("height", newContSize).attr("width", newContSize);
-            clk.$container.css({'height': newContSize + 'px'});
-        },
-
         // Search data params
         getInitialDataParams: function() {
             return ({

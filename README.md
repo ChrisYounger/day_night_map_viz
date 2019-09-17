@@ -80,7 +80,7 @@ The following third-party libraries are used by this app. Thank you!
 * World Daylight Map - MIT - https://github.com/pauljnoble/world-daylight-map
 * D3.js - BSD 3-Clause "New" or "Revised" License - https://d3js.org/
 * D3 Geocode Projections - BSD 3-Clause "New" or "Revised" License - https://github.com/mbostock/d3/wiki/Geo-Projections
-* Topojson - - https://github.com/mbostock/topojson
+* Topojson - BSD 3-Clause "New" or "Revised" License - https://github.com/mbostock/topojson
 * Suncalc - BSD 2-Clause "Simplified" License - https://github.com/mourner/suncalc
-* MaxMind cities - Creative Commons Attribution-ShareAlike 4.0 International License. - https://www.maxmind.com/en/free-world-cities-database
+* MaxMind cities - Creative Commons Attribution-ShareAlike 4.0 International License. - https://dev.maxmind.com/geoip/geoip2/geolite2/
 * Font Awesome - Creative Commons Attribution-ShareAlike 4.0 License - https://fontawesome.com/
