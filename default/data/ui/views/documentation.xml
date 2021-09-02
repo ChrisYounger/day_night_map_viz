@@ -1,4 +1,4 @@
-<dashboard theme="light">
+<dashboard version="1.1" theme="light">
 <label>DayNightMap Viz - Documentation</label>
 <row>
 <panel>
